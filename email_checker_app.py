@@ -104,55 +104,15 @@ def check_email(email):
     return result
 
 # Streamlit UI
-st.set_page_config(page_title="Local Email Checker", layout="wide")
-st.sidebar.title("📋 Menu")
-selection = st.sidebar.radio("Navigate to", ["Email Validator", "How it Works"])
+st.set_page_config(page_title="Local Email Checker", layout="centered")
 
-if selection == "How it Works":
-    st.title("📘 How This App Works")
-    st.markdown("""
-    This tool checks the health of email addresses without storing or sharing any data. 
+# Sidebar menu
+with st.sidebar:
+    st.title("📬 Email Validator")
+    menu = st.radio("Menu", ["Main", "How it works"])
 
-    When you upload or paste a list of emails, it:
-    - Validates basic syntax
-    - Checks MX records
-    - Detects catch-all domains
-    - Flags disposable or risky domains
-
-    All processing happens live, and no data is saved after validation.
-    """)
-
-    st.subheader("📄 CSV Format Guide")
-    st.markdown("""
-    - Your CSV must have a single column named `email`
-    - No header row needed if you upload your own list
-    - Sample format:
-
-        ```csv
-        email
-        test@example.com
-        hello@domain.com
-        info@company.org
-        ```
-    """)
-
-    st.subheader("🚀 App Features")
-    st.markdown("""
-    - ✅ Validates email format
-    - 📬 Checks domain MX records
-    - 🛡️ Detects catch-all mail servers
-    - 🔍 Screens out disposable and temporary emails
-    - 🧪 Risk-flagging logic with clear icon indicators
-    - 🔒 Fully private — we do not collect or store your data
-    - 💾 Download results as CSV
-    
-    ---
-    ☕ If this tool helped you, consider [buying me a coffee](https://buymeacoffee.com/nimaa) 🙏
-    """)
-
-else:
+if menu == "Main":
     st.title("📧 Local Email Health Checker")
-
     input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
 
     emails = []
@@ -201,3 +161,32 @@ else:
 
             csv = final_df.to_csv(index=False).encode('utf-8')
             st.download_button("📥 Download Results CSV", data=csv, file_name='checked_emails.csv', mime='text/csv')
+
+elif menu == "How it works":
+    st.subheader("📘 How This App Works")
+
+    st.markdown("### ✅ Features")
+    st.markdown("""
+- No signup or installation needed
+- Fast and local email validation
+- Syntax, MX record, disposable domain, and catch-all detection
+- Status: 🟢 Okay to Send, 🔴 Do Not Send, 🟠 Catch-All
+""")
+
+    st.markdown("### 📄 CSV Format")
+    st.markdown("""
+Make sure your file includes a column named `email`.
+
+**Example:**
+```
+email
+john@example.com
+test@domain.com
+```
+""")
+
+    st.markdown("### 🔒 Privacy")
+    st.info("We do not store or collect any data. Everything runs locally in your browser session.")
+
+    st.markdown("---")
+    st.markdown("☕ [Buy me a coffee](https://buymeacoffee.com/nimaa)", unsafe_allow_html=True)
