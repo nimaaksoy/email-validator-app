@@ -106,15 +106,14 @@ def check_email(email):
 # Streamlit UI
 st.set_page_config(page_title="Local Email Checker", layout="centered")
 
-# Sidebar menu
 with st.sidebar:
     st.title("📬 Email Validator")
-    menu = st.radio("Menu", ["Main", "How it works"])
+    menu = st.radio("Navigation", ["Main", "How it works"])
 
 if menu == "Main":
     st.title("📧 Local Email Health Checker")
-    input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
 
+    input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
     emails = []
 
     if input_method == "Upload CSV":
@@ -167,26 +166,26 @@ elif menu == "How it works":
 
     st.markdown("### ✅ Features")
     st.markdown("""
-- No signup or installation needed
-- Fast and local email validation
-- Syntax, MX record, disposable domain, and catch-all detection
-- Status: 🟢 Okay to Send, 🔴 Do Not Send, 🟠 Catch-All
-""")
+    – No signup or installation needed  
+    – Fast and local email validation  
+    – Syntax, MX record, disposable domain, and catch-all detection  
+    – Status: 🟢 Okay to Send, 🔴 Do Not Send, 🟠 Catch-All
+    """)
 
     st.markdown("### 📄 CSV Format")
     st.markdown("""
-Make sure your file includes a column named `email`.
+    Make sure your file includes a column named `email`.
 
-**Example:**
-```
-email
-john@example.com
-test@domain.com
-```
-""")
+    **Example:**
+    ```
+    email
+    john@example.com
+    test@domain.com
+    ```
+    """)
 
-    st.markdown("### 🔒 Privacy")
+    st.markdown("### 🔐 Privacy")
     st.info("We do not store or collect any data. Everything runs locally in your browser session.")
 
-    st.markdown("---")
-    st.markdown("☕ [Buy me a coffee](https://buymeacoffee.com/nimaa)", unsafe_allow_html=True)
+    st.markdown("### ☕ Support This App")
+    st.markdown("[Buy me a coffee](https://buymeacoffee.com/nimaa)")
