@@ -32,7 +32,6 @@ def is_catch_all(domain):
         server.quit()
 
         if code == 250:
-            # Treat as maybe catch-all (not confirmed)
             result = 'maybe'
         elif code == 550:
             result = False
@@ -105,54 +104,100 @@ def check_email(email):
     return result
 
 # Streamlit UI
-st.set_page_config(page_title="Local Email Checker", layout="centered")
-st.title("📧 Local Email Health Checker")
+st.set_page_config(page_title="Local Email Checker", layout="wide")
+st.sidebar.title("📋 Menu")
+selection = st.sidebar.radio("Navigate to", ["Email Validator", "How it Works"])
 
-input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
+if selection == "How it Works":
+    st.title("📘 How This App Works")
+    st.markdown("""
+    This tool checks the health of email addresses without storing or sharing any data. 
 
-emails = []
+    When you upload or paste a list of emails, it:
+    - Validates basic syntax
+    - Checks MX records
+    - Detects catch-all domains
+    - Flags disposable or risky domains
 
-if input_method == "Upload CSV":
-    uploaded_file = st.file_uploader("Upload a CSV file with an 'email' column", type="csv")
-    if uploaded_file:
-        df = pd.read_csv(uploaded_file, usecols=[0], names=["email"], skiprows=1)
-        if 'email' not in df.columns:
-            st.error("CSV must have a column named 'email'.")
-        else:
-            emails = df['email'].dropna().astype(str).str.replace(';', '', regex=False).str.strip().tolist()
+    All processing happens live, and no data is saved after validation.
+    """)
 
-elif input_method == "Paste Emails":
-    pasted = st.text_area("Paste email addresses (one per line)")
-    if pasted.strip():
-        emails = [line.strip() for line in pasted.strip().split('\n') if line.strip()]
+    st.subheader("📄 CSV Format Guide")
+    st.markdown("""
+    - Your CSV must have a single column named `email`
+    - No header row needed if you upload your own list
+    - Sample format:
 
-if emails:
-    if st.button("Check Emails"):
-        checked_results = []
-        progress_bar = st.progress(0)
-        status_placeholder = st.empty()
+        ```csv
+        email
+        test@example.com
+        hello@domain.com
+        info@company.org
+        ```
+    """)
 
-        for idx, email in enumerate(emails):
-            progress = int((idx + 1) / len(emails) * 100)
-            progress_bar.progress(progress)
+    st.subheader("🚀 App Features")
+    st.markdown("""
+    - ✅ Validates email format
+    - 📬 Checks domain MX records
+    - 🛡️ Detects catch-all mail servers
+    - 🔍 Screens out disposable and temporary emails
+    - 🧪 Risk-flagging logic with clear icon indicators
+    - 🔒 Fully private — we do not collect or store your data
+    - 💾 Download results as CSV
+    
+    ---
+    ☕ If this tool helped you, consider [buying me a coffee](https://buymeacoffee.com/nimaa) 🙏
+    """)
 
-            loading_result = {
-                'email': email,
-                'validation_status': 'Checking...',
-                'validation_analysis': ''
-            }
-            live_df = pd.DataFrame(checked_results + [loading_result])
-            live_df['validation_status'] = live_df['validation_status'].apply(status_icon)
-            status_placeholder.dataframe(live_df)
+else:
+    st.title("📧 Local Email Health Checker")
 
-            result = check_email(email)
-            checked_results.append(result)
-            time.sleep(1)
+    input_method = st.radio("Choose input method:", ["Upload CSV", "Paste Emails"])
 
-        st.success("✅ Done!")
-        final_df = pd.DataFrame(checked_results)
-        final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
-        st.dataframe(final_df)
+    emails = []
 
-        csv = final_df.to_csv(index=False).encode('utf-8')
-        st.download_button("📥 Download Results CSV", data=csv, file_name='checked_emails.csv', mime='text/csv')
+    if input_method == "Upload CSV":
+        uploaded_file = st.file_uploader("Upload a CSV file with an 'email' column", type="csv")
+        if uploaded_file:
+            df = pd.read_csv(uploaded_file, usecols=[0], names=["email"], skiprows=1)
+            if 'email' not in df.columns:
+                st.error("CSV must have a column named 'email'.")
+            else:
+                emails = df['email'].dropna().astype(str).str.replace(';', '', regex=False).str.strip().tolist()
+
+    elif input_method == "Paste Emails":
+        pasted = st.text_area("Paste email addresses (one per line)")
+        if pasted.strip():
+            emails = [line.strip() for line in pasted.strip().split('\n') if line.strip()]
+
+    if emails:
+        if st.button("Check Emails"):
+            checked_results = []
+            progress_bar = st.progress(0)
+            status_placeholder = st.empty()
+
+            for idx, email in enumerate(emails):
+                progress = int((idx + 1) / len(emails) * 100)
+                progress_bar.progress(progress)
+
+                loading_result = {
+                    'email': email,
+                    'validation_status': 'Checking...',
+                    'validation_analysis': ''
+                }
+                live_df = pd.DataFrame(checked_results + [loading_result])
+                live_df['validation_status'] = live_df['validation_status'].apply(status_icon)
+                status_placeholder.dataframe(live_df)
+
+                result = check_email(email)
+                checked_results.append(result)
+                time.sleep(1)
+
+            st.success("✅ Done!")
+            final_df = pd.DataFrame(checked_results)
+            final_df['validation_status'] = final_df['validation_status'].apply(status_icon)
+            st.dataframe(final_df)
+
+            csv = final_df.to_csv(index=False).encode('utf-8')
+            st.download_button("📥 Download Results CSV", data=csv, file_name='checked_emails.csv', mime='text/csv')
